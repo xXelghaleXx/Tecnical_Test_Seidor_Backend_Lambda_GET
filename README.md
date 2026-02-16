@@ -1,69 +1,173 @@
-<!--
-title: 'AWS Simple HTTP Endpoint example in NodeJS'
-description: 'This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.'
-layout: Doc
-framework: v4
-platform: AWS
-language: nodeJS
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, Inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# 🌐 SWAPI Lambda API (GET) - Serverless Service
 
-# Serverless Framework Node HTTP API on AWS
+Bienvenido al microservicio **GET** de la Prueba Técnica Seidor. Este proyecto implementa una API REST Serverless utilizando **AWS Lambda** y **API Gateway** para consultar información de Star Wars y gestionar favoritos.
 
-This template demonstrates how to make a simple HTTP API with Node.js running on AWS Lambda and API Gateway using the Serverless Framework.
+## 🏗️ Arquitectura y Tecnologías
 
-This template does not include any kind of persistence (database). For more advanced examples, check out the [serverless/examples repository](https://github.com/serverless/examples/) which includes Typescript, Mongo, DynamoDB and other examples.
+El proyecto está construido sobre las siguientes tecnologías:
 
-## Usage
+-   **Runtime**: Node.js 20.x
+-   **Framework**: Serverless Framework v3 (Configuración Infrastructure as Code en `serverless.yml`)
+-   **Lenguaje**: TypeScript (Compilación a JS optimizada con `esbuild`)
+-   **Base de Datos**: MySQL (Conexión mediante `mysql2`)
+-   **Integraciones**: SWAPI (The Star Wars API)
+-   **Despliegue**: AWS Lambda + Amazon API Gateway (HTTP API)
 
-### Deployment
+---
 
-In order to deploy the example, you need to run the following command:
+## 📂 Estructura del Proyecto
 
+Entender la estructura es clave para mantener el proyecto. Aquí te explicamos qué hace cada carpeta:
+
+```text
+Swapi-Lambda-http-api-get/
+├── src/
+│   ├── handlers/           # ⚡ Controladores Lambda (Puntos de entrada)
+│   │   ├── getPeople.ts    # Lógica para obtener personajes de SWAPI + Traducción
+│   │   └── getFavorites.ts # Lógica para leer favoritos de MySQL
+│   ├── services/           # 🧠 Lógica de Negocio
+│   │   ├── swapi.service.ts # Cliente HTTP para conectar con SWAPI
+│   │   └── db.service.ts    # Gestión de consultas a MySQL
+│   ├── utils/              # 🛠️ Utilidades compartidas
+│   │   ├── response.ts     # Estandarización de respuestas JSON (200, 400, 500)
+│   │   └── translator.ts   # Diccionario de traducción inglés -> español
+│   └── types/              # 📝 Definiciones de Tipos TypeScript
+├── serverless.yml          # ⚙️ Configuración Maestra del despliegue en AWS
+├── package.json            # 📦 Dependencias (libs) y scripts
+└── tsconfig.json           # 🔧 Configuración del compilador TypeScript
 ```
+
+---
+
+## 🚀 Guía de Instalación "Paso a Paso"
+
+### 1. Prerrequisitos
+Asegúrate de tener instalado en tu máquina:
+-   **Node.js** (v18 o superior): `node -v`
+-   **Serverless Framework**: `npm install -g serverless`
+-   **AWS CLI**: Configurado con tus credenciales (`aws configure`).
+
+### 2. Instalación de Dependencias
+Descarga las librerías necesarias con un solo comando:
+
+```bash
+npm install
+```
+
+### 3. Configuración de Entorno (.env)
+Este es el paso más importante. Crea un archivo llamado `.env` en la raíz y configurálos con tus datos de conexión a MySQL.
+
+**Archivo: `.env`**
+```ini
+DB_HOST=swapi-db.cluster-xyz.us-east-1.rds.amazonaws.com
+DB_USER=admin
+DB_PASSWORD=tu_password_secreto
+DB_NAME=swapi_db
+```
+> ⚠️ **Nota:** Si pruebas en local, asegúrate de que tu IP tenga permiso para acceder a la base de datos (Security Groups en AWS RDS).
+
+---
+
+## 🛠️ Comandos de Despliegue y Pruebas
+
+### Desplegar en AWS (Producción)
+Para subir tu código a la nube:
+
+```bash
 serverless deploy
 ```
+Este comando empaquetará tu código, creará las funciones Lambda y te devolverá las URLs públicas.
 
-After running deploy, you should see output similar to:
-
-```
-Deploying "serverless-http-api" to stage "dev" (us-east-1)
-
-✔ Service deployed to stack serverless-http-api-dev (91s)
-
-endpoint: GET - https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/
-functions:
-  hello: serverless-http-api-dev-hello (1.6 kB)
+**Salida esperada:**
+```cmd
+endpoints:
+  GET - https://random_id.execute-api.us-east-1.amazonaws.com/api/people
+  GET - https://random_id.execute-api.us-east-1.amazonaws.com/api/favorites
 ```
 
-_Note_: In current form, after deployment, your API is public and can be invoked by anyone. For production deployments, you might want to configure an authorizer. For details on how to do that, refer to [HTTP API (API Gateway V2) event docs](https://www.serverless.com/framework/docs/providers/aws/events/http-api).
+### Ejecutar en Local (Offline)
+Puedes simular la ejecución de una función sin subirla a AWS:
 
-### Invocation
+```bash
+# Probar endpoint de personajes
+serverless invoke local --function getPeople
 
-After successful deployment, you can call the created application via HTTP:
-
-```
-curl https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
-```
-
-Which should result in response similar to:
-
-```json
-{ "message": "Go Serverless v4! Your function executed successfully!" }
+# Probar endpoint de favoritos
+serverless invoke local --function getFavorites
 ```
 
-### Local development
+---
 
-The easiest way to develop and test your function is to use the `dev` command:
+## 🔌 Documentación de Endpoints
 
-```
-serverless dev
-```
+### 1. `GET /api/people`
+Obtiene personajes de la API oficial de Star Wars (SWAPI), traduce sus atributos al español y añade soporte para búsqueda.
 
-This will start a local emulator of AWS Lambda and tunnel your requests to and from AWS Lambda, allowing you to interact with your function as if it were running in the cloud.
+-   **Query Params:**
+    -   `page`: Número de paginación (ej: `?page=2`).
+    -   `search`: Filtro por nombre (ej: `?search=skywalker`).
+-   **Respuesta Exitosa (200 OK):**
+    ```json
+    {
+      "total": 82,
+      "siguiente": "...",
+      "anterior": null,
+      "resultados": [
+        {
+          "nombre": "Luke Skywalker",
+          "altura": "172",
+          "color_ojos": "blue"
+          // ... atributos traducidos
+        }
+      ]
+    }
+    ```
 
-Now you can invoke the function as before, but this time the function will be executed locally. Now you can develop your function locally, invoke it, and see the results immediately without having to re-deploy.
+### 2. `GET /api/favorites`
+Consulta la base de datos MySQL para listar los personajes que han sido guardados como favoritos.
 
-When you are done developing, don't forget to run `serverless deploy` to deploy the function to the cloud.
+-   **Query Params:**
+    -   `page`: Página actual (Default: 1).
+    -   `pageSize`: Cantidad de registros por página (Default: 10).
+-   **Respuesta Exitosa (200 OK):**
+    ```json
+    {
+      "page": 1,
+      "limit": 10,
+      "total": 5,
+      "data": [
+        { "id": "1", "nombre": "Luke Skywalker", "fecha_creacion": "..." }
+      ]
+    }
+    ```
+
+---
+
+## 🚑 Solución de Problemas Comunes (Troubleshooting)
+
+### Error: `Connect ETIMEDOUT`
+-   **Causa:** La función Lambda no puede conectar con la base de datos.
+-   **Solución:** Revisa los **Security Groups** de tu RDS en AWS. Deben permitir tráfico entrante (Inbound Rules) en el puerto `3306` desde `0.0.0.0/0` (para pruebas públicas) o desde la VPC de la Lambda.
+
+### Error: `Internal Server Error`
+-   **Causa:** Error no controlado en el código o fallo en SWAPI.
+-   **Solución:** Ve a **AWS CloudWatch** > Log groups > `/aws/lambda/Swapi-Lambda-http-api-get-dev-getPeople` para ver el detalle exacto del error.
+
+### Error: `Missing Authentication Token` al llamar a la API
+-   **Causa:** Estás llamando a una URL incorrecta.
+-   **Solución:** Verifica que la URL termine exactamente en `/api/people` o `/api/favorites`. A veces falta el path final.
+
+---
+
+## 📦 Scripts Disponibles
+
+| Script | Descripción |
+| :--- | :--- |
+| `npm install` | Instala las dependencias del proyecto. |
+| `serverless deploy` | Desplegar la aplicación en AWS. |
+| `serverless invoke local -f [nombre]` | Ejecutar una función localmente para pruebas. |
+| `npm test` | Ejecutar pruebas unitarias (si están configuradas). |
+
+---
+
+**Desarrollado por Adrian Nuñuvero Ochoa con cariño para la Prueba Técnica Seidor 2026**
