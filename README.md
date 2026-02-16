@@ -170,4 +170,19 @@ Consulta la base de datos MySQL para listar los personajes que han sido guardado
 
 ---
 
+## ✅ Pruebas y Validación (Evidencia)
+
+El código ha sido sometido a pruebas unitarias automatizadas para garantizar su estabilidad.
+
+**Resultado de ejecución (`npm test`):**
+```bash
+PASS  tests/handlers/getPeople.test.ts
+Test Suites: 1 passed, 1 total
+Tests:       2 passed, 2 total
+Snapshots:   0 total
+Time:        0.495 s
+```
+
+---
+
 **Desarrollado por Adrian Nuñuvero Ochoa con cariño para la Prueba Técnica Seidor 2026**
