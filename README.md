@@ -1,180 +1,128 @@
-# 🌐 SWAPI Lambda API (GET) - Serverless Service
+# SEIDOR SWAPI - Backend GET Service
+⭐ Microservicio Serverless para Lectura de Datos ⭐
 
-Bienvenido al microservicio **GET** de la Prueba Técnica Seidor. Este proyecto implementa una API REST Serverless utilizando **AWS Lambda** y **API Gateway** para consultar información de Star Wars y gestionar favoritos.
+![AWS Lambda](https://img.shields.io/badge/AWS_Lambda-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)
+![Serverless](https://img.shields.io/badge/Serverless-FD5750?style=for-the-badge&logo=serverless&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 
-## 🏗️ Arquitectura y Tecnologías
-
-El proyecto está construido sobre las siguientes tecnologías:
-
--   **Runtime**: Node.js 20.x
--   **Framework**: Serverless Framework v3 (Configuración Infrastructure as Code en `serverless.yml`)
--   **Lenguaje**: TypeScript (Compilación a JS optimizada con `esbuild`)
--   **Base de Datos**: MySQL (Conexión mediante `mysql2`)
--   **Integraciones**: SWAPI (The Star Wars API)
--   **Despliegue**: AWS Lambda + Amazon API Gateway (HTTP API)
-
----
-
-## 📂 Estructura del Proyecto
-
-Entender la estructura es clave para mantener el proyecto. Aquí te explicamos qué hace cada carpeta:
-
-```text
-Swapi-Lambda-http-api-get/
-├── src/
-│   ├── handlers/           # ⚡ Controladores Lambda (Puntos de entrada)
-│   │   ├── getPeople.ts    # Lógica para obtener personajes de SWAPI + Traducción
-│   │   └── getFavorites.ts # Lógica para leer favoritos de MySQL
-│   ├── services/           # 🧠 Lógica de Negocio
-│   │   ├── swapi.service.ts # Cliente HTTP para conectar con SWAPI
-│   │   └── db.service.ts    # Gestión de consultas a MySQL
-│   ├── utils/              # 🛠️ Utilidades compartidas
-│   │   ├── response.ts     # Estandarización de respuestas JSON (200, 400, 500)
-│   │   └── translator.ts   # Diccionario de traducción inglés -> español
-│   └── types/              # 📝 Definiciones de Tipos TypeScript
-├── serverless.yml          # ⚙️ Configuración Maestra del despliegue en AWS
-├── package.json            # 📦 Dependencias (libs) y scripts
-└── tsconfig.json           # 🔧 Configuración del compilador TypeScript
-```
+## 📋 Tabla de Contenidos
+1.  [Descripción](#-descripción)
+2.  [Características](#-características)
+3.  [Tecnologías](#-tecnologías)
+4.  [Requisitos Previos](#-requisitos-previos)
+5.  [Instalación](#-instalación)
+6.  [Configuración](#-configuración)
+7.  [Compilación y Despliegue](#-compilación-y-despliegue)
+8.  [Testing](#-testing)
+9.  [Estructura del Proyecto](#-estructura-del-proyecto)
+10. [Endpoints](#-endpoints)
+11. [Decisiones Técnicas](#-decisiones-técnicas)
 
 ---
 
-## 🚀 Guía de Instalación "Paso a Paso"
+## 🚀 Descripción
+Este microservicio backend implementa una arquitectura **Serverless** orientada a la lectura de datos. Su responsabilidad es actuar como pasarela inteligente hacia SWAPI (Star Wars API), realizando traducción de atributos al vuelo, y consultar la base de datos MySQL para recuperar la lista de favoritos.
 
-### 1. Prerrequisitos
-Asegúrate de tener instalado en tu máquina:
--   **Node.js** (v18 o superior): `node -v`
--   **Serverless Framework**: `npm install -g serverless`
--   **AWS CLI**: Configurado con tus credenciales (`aws configure`).
+Diseñado para escalar automáticamente y minimizar costos mediante **AWS Lambda**.
 
-### 2. Instalación de Dependencias
-Descarga las librerías necesarias con un solo comando:
+---
 
-```bash
-npm install
-```
+## ✨ Características
 
-### 3. Configuración de Entorno (.env)
-Este es el paso más importante. Crea un archivo llamado `.env` en la raíz y configurálos con tus datos de conexión a MySQL.
+### 📡 Integración SWAPI
+-   **Proxy Inteligente**: Consulta a la API externa de Star Wars.
+-   **Mapeo de Datos**: Traduce los campos de inglés a español (ej: `hair_color` -> `color_pelo`).
+-   **Búsqueda**: Soporta filtrado por nombre reenviando parámetros a SWAPI.
 
-**Archivo: `.env`**
+### 💾 Lectura de Base de Datos
+-   **Consultas Optimizadas**: Lectura paginada de la tabla `favorites` en MySQL.
+-   **Conexión Eficiente**: Gestión de pool de conexiones para entornos Serverless.
+
+---
+
+## 🛠 Tecnologías
+-   **Node.js 20.x**: Runtime de ejecución moderno y estable.
+-   **Serverless Framework v3**: Orquestación de infraestructura como código (IaC).
+-   **TypeScript**: Desarrollo robusto con tipos estrictos.
+-   **AWS Lambda**: Computación sin servidor.
+-   **Amazon API Gateway (HTTP API)**: Exposición de endpoints RESTful de baja latencia.
+-   **MySQL2**: Cliente de base de datos optimizado.
+-   **Jest**: Framework de testing unitario.
+
+---
+
+## 📦 Requisitos Previos
+
+-   **Node.js** >= 18.x
+-   **Serverless Framework Global**: `npm i -g serverless`
+-   **Credenciales AWS**: Configuradas localmente (`aws configure`).
+-   **Base de Datos MySQL**: Instancia accesible.
+
+---
+
+## 💻 Instalación
+
+1.  **Clonar y acceder:**
+    ```bash
+    cd Swapi-Lambda-http-api-get
+    ```
+
+2.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
+
+---
+
+## ⚙️ Configuración
+
+### Variables de Entorno
+Crea un archivo `.env` en la raíz con las credenciales de tu base de datos:
+
 ```ini
 DB_HOST=database-swapi.ci54eqae82ye.us-east-1.rds.amazonaws.com
 DB_USER=admin
 DB_NAME=SWAPI_DB_tec_test
 DB_PASSWORD=adrian123
 ```
-> ⚠️ **Nota:** Si pruebas en local, asegúrate de que tu IP tenga permiso para acceder a la base de datos (Security Groups en AWS RDS).
 
 ---
 
-## 🛠️ Comandos de Despliegue y Pruebas
+## 🚀 Compilación y Despliegue
 
-### Desplegar en AWS (Producción)
-Para subir tu código a la nube:
+### Despliegue a AWS
+Este comando compila el TypeScript, empaqueta la función y crea la infraestructura en CloudFormation.
 
 ```bash
 serverless deploy
 ```
-Este comando empaquetará tu código, creará las funciones Lambda y te devolverá las URLs públicas.
 
-**Salida esperada:**
-```cmd
-endpoints:
-  GET - https://random_id.execute-api.us-east-1.amazonaws.com/api/people
-  GET - https://random_id.execute-api.us-east-1.amazonaws.com/api/favorites
-```
-
-### Ejecutar en Local (Offline)
-Puedes simular la ejecución de una función sin subirla a AWS:
-
+**Salida exitosa:**
 ```bash
-# Probar endpoint de personajes
-serverless invoke local --function getPeople
+endpoints:
+  GET - https://xyz.execute-api.us-east-1.amazonaws.com/api/people
+  GET - https://xyz.execute-api.us-east-1.amazonaws.com/api/favorites
+```
 
-# Probar endpoint de favoritos
-serverless invoke local --function getFavorites
+### Ejecución Local (Offline)
+Para probar sin desplegar:
+```bash
+serverless invoke local --function getPeople
 ```
 
 ---
 
-## 🔌 Documentación de Endpoints
+## 🧪 Testing
 
-### 1. `GET /api/people`
-Obtiene personajes de la API oficial de Star Wars (SWAPI), traduce sus atributos al español y añade soporte para búsqueda.
+### Evidencia de Validación
+El código cuenta con pruebas unitarias para asegurar la integridad de los handlers.
 
--   **Query Params:**
-    -   `page`: Número de paginación (ej: `?page=2`).
-    -   `search`: Filtro por nombre (ej: `?search=skywalker`).
--   **Respuesta Exitosa (200 OK):**
-    ```json
-    {
-      "total": 82,
-      "siguiente": "...",
-      "anterior": null,
-      "resultados": [
-        {
-          "nombre": "Luke Skywalker",
-          "altura": "172",
-          "color_ojos": "blue"
-          // ... atributos traducidos
-        }
-      ]
-    }
-    ```
+**Ejecutar Tests:**
+```bash
+npm test
+```
 
-### 2. `GET /api/favorites`
-Consulta la base de datos MySQL para listar los personajes que han sido guardados como favoritos.
-
--   **Query Params:**
-    -   `page`: Página actual (Default: 1).
-    -   `pageSize`: Cantidad de registros por página (Default: 10).
--   **Respuesta Exitosa (200 OK):**
-    ```json
-    {
-      "page": 1,
-      "limit": 10,
-      "total": 5,
-      "data": [
-        { "id": "1", "nombre": "Luke Skywalker", "fecha_creacion": "..." }
-      ]
-    }
-    ```
-
----
-
-## 🚑 Solución de Problemas Comunes (Troubleshooting)
-
-### Error: `Connect ETIMEDOUT`
--   **Causa:** La función Lambda no puede conectar con la base de datos.
--   **Solución:** Revisa los **Security Groups** de tu RDS en AWS. Deben permitir tráfico entrante (Inbound Rules) en el puerto `3306` desde `0.0.0.0/0` (para pruebas públicas) o desde la VPC de la Lambda.
-
-### Error: `Internal Server Error`
--   **Causa:** Error no controlado en el código o fallo en SWAPI.
--   **Solución:** Ve a **AWS CloudWatch** > Log groups > `/aws/lambda/Swapi-Lambda-http-api-get-dev-getPeople` para ver el detalle exacto del error.
-
-### Error: `Missing Authentication Token` al llamar a la API
--   **Causa:** Estás llamando a una URL incorrecta.
--   **Solución:** Verifica que la URL termine exactamente en `/api/people` o `/api/favorites`. A veces falta el path final.
-
----
-
-## 📦 Scripts Disponibles
-
-| Script | Descripción |
-| :--- | :--- |
-| `npm install` | Instala las dependencias del proyecto. |
-| `serverless deploy` | Desplegar la aplicación en AWS. |
-| `serverless invoke local -f [nombre]` | Ejecutar una función localmente para pruebas. |
-| `npm test` | Ejecutar pruebas unitarias (si están configuradas). |
-
----
-
-## ✅ Pruebas y Validación (Evidencia)
-
-El código ha sido sometido a pruebas unitarias automatizadas para garantizar su estabilidad.
-
-**Resultado de ejecución (`npm test`):**
+**Resultado de ejecución:**
 ```bash
 PASS  tests/handlers/getPeople.test.ts
 Test Suites: 1 passed, 1 total
@@ -182,6 +130,52 @@ Tests:       2 passed, 2 total
 Snapshots:   0 total
 Time:        0.495 s
 ```
+
+---
+
+## 📁 Estructura del Proyecto
+
+```text
+Swapi-Lambda-http-api-get/
+├── src/
+│   ├── handlers/       # Controladores (Entry Points)
+│   │   ├── getPeople.ts
+│   │   └── getFavorites.ts
+│   ├── services/       # Lógica de Negocio y Accesos a Datos
+│   │   ├── swapi.service.ts
+│   │   └── db.service.ts
+│   ├── utils/          # Helpers (Traductor, Respuestas HTTP)
+│   └── types/          # Interfaces
+├── serverless.yml      # Definición de Infraestructura
+└── package.json
+```
+
+---
+
+## 🔗 Endpoints
+
+| Método | Ruta | Descripción | Params |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/people` | Obtiene personajes de SWAPI traducidos. | `page`, `search` |
+| **GET** | `/api/favorites` | Lista favoritos guardados en BD. | `page`, `pageSize` |
+
+---
+
+## 🧠 Decisiones Técnicas
+
+### ¿Por qué Arquitectura Serverless?
+-   **Costos**: Modelo "Pay-as-you-go". Solo se paga cuando se usa la API (ideal para pruebas técnicas y tráfico variable).
+-   **Mantenimiento**: No requiere administración de servidores (EC2), parches o escalado manual.
+
+### Separación en Microservicios (GET vs POST)
+Se decidió separar las operaciones de **Lectura (GET)** de las de **Escritura (POST)** en servicios independientes.
+-   **Escalabilidad Independiente**: Si la lectura tiene mucho tráfico (muy común), escala sin afectar al servicio de escritura.
+-   **Seguridad**: Se pueden aplicar políticas de IAM más estrictas por separado (Read-Only vs Read-Write).
+
+### Uso de MySQL vs DynamoDB
+Aunque DynamoDB es nativo de Serverless, se eligió **MySQL** porque:
+-   **Requisito de Relación**: Estructura de datos tabular clara.
+-   **Flexibilidad**: SQL es un estándar de industria ampliamente conocido.
 
 ---
 
