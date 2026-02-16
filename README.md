@@ -1,205 +1,173 @@
-🌐 SWAPI Lambda API – People & Favorites Service (GET)
+# 🌐 SWAPI Lambda API (GET) - Serverless Service
 
-Microservicio Serverless desarrollado para la Prueba Técnica Seidor 2026.
+Bienvenido al microservicio **GET** de la Prueba Técnica Seidor. Este proyecto implementa una API REST Serverless utilizando **AWS Lambda** y **API Gateway** para consultar información de Star Wars y gestionar favoritos.
 
-Este servicio expone endpoints REST para:
+## 🏗️ Arquitectura y Tecnologías
 
-✅ Consultar personajes desde SWAPI
+El proyecto está construido sobre las siguientes tecnologías:
 
-✅ Traducir atributos al español
+-   **Runtime**: Node.js 20.x
+-   **Framework**: Serverless Framework v3 (Configuración Infrastructure as Code en `serverless.yml`)
+-   **Lenguaje**: TypeScript (Compilación a JS optimizada con `esbuild`)
+-   **Base de Datos**: MySQL (Conexión mediante `mysql2`)
+-   **Integraciones**: SWAPI (The Star Wars API)
+-   **Despliegue**: AWS Lambda + Amazon API Gateway (HTTP API)
 
-✅ Consultar favoritos almacenados en MySQL
+---
 
-✅ Soportar paginación y búsqueda
+## 📂 Estructura del Proyecto
 
-Se despliega como servicio independiente y comparte base de datos con el microservicio POST.
+Entender la estructura es clave para mantener el proyecto. Aquí te explicamos qué hace cada carpeta:
 
-🏗️ Arquitectura
-Stack Tecnológico
-
-Runtime: Node.js 20.x
-
-Lenguaje: TypeScript
-
-Framework: Serverless Framework v3
-
-Bundler: esbuild (optimización de tamaño y cold start)
-
-Infraestructura: AWS Lambda + API Gateway (HTTP API)
-
-Base de Datos: MySQL (Amazon RDS)
-
-Cliente HTTP: Integración con SWAPI
-
-Patrón: Arquitectura modular por capas
-
-📂 Estructura del Proyecto
+```text
 Swapi-Lambda-http-api-get/
 ├── src/
-│   ├── handlers/
-│   │   ├── getPeople.ts
-│   │   └── getFavorites.ts
-│   ├── services/
-│   │   ├── swapi.service.ts
-│   │   └── db.service.ts
-│   ├── utils/
-│   │   ├── response.ts
-│   │   └── translator.ts
-│   └── types/
-├── serverless.yml
-├── package.json
-├── tsconfig.json
-└── README.md
-Responsabilidades por Capa
-Capa	Responsabilidad
-Handlers	Punto de entrada Lambda
-Services	Lógica de negocio y acceso externo
-Utils	Funciones reutilizables
-Types	Definición estricta de contratos
+│   ├── handlers/           # ⚡ Controladores Lambda (Puntos de entrada)
+│   │   ├── getPeople.ts    # Lógica para obtener personajes de SWAPI + Traducción
+│   │   └── getFavorites.ts # Lógica para leer favoritos de MySQL
+│   ├── services/           # 🧠 Lógica de Negocio
+│   │   ├── swapi.service.ts # Cliente HTTP para conectar con SWAPI
+│   │   └── db.service.ts    # Gestión de consultas a MySQL
+│   ├── utils/              # 🛠️ Utilidades compartidas
+│   │   ├── response.ts     # Estandarización de respuestas JSON (200, 400, 500)
+│   │   └── translator.ts   # Diccionario de traducción inglés -> español
+│   └── types/              # 📝 Definiciones de Tipos TypeScript
+├── serverless.yml          # ⚙️ Configuración Maestra del despliegue en AWS
+├── package.json            # 📦 Dependencias (libs) y scripts
+└── tsconfig.json           # 🔧 Configuración del compilador TypeScript
+```
 
-Separación clara para mantener escalabilidad y mantenibilidad.
+---
 
-🚀 Instalación Rápida
-1️⃣ Prerrequisitos
+## 🚀 Guía de Instalación "Paso a Paso"
 
-Verifica que tengas instalado:
+### 1. Prerrequisitos
+Asegúrate de tener instalado en tu máquina:
+-   **Node.js** (v18 o superior): `node -v`
+-   **Serverless Framework**: `npm install -g serverless`
+-   **AWS CLI**: Configurado con tus credenciales (`aws configure`).
 
-Node.js ≥ 18
+### 2. Instalación de Dependencias
+Descarga las librerías necesarias con un solo comando:
 
-node -v
-
-Serverless Framework
-
-npm install -g serverless
-
-AWS CLI configurado
-
-aws configure
-2️⃣ Instalar dependencias
+```bash
 npm install
-3️⃣ Configurar variables de entorno
+```
 
-Crear archivo .env en la raíz:
+### 3. Configuración de Entorno (.env)
+Este es el paso más importante. Crea un archivo llamado `.env` en la raíz y configurálos con tus datos de conexión a MySQL.
 
+**Archivo: `.env`**
+```ini
 DB_HOST=swapi-db.cluster-xyz.us-east-1.rds.amazonaws.com
 DB_USER=admin
 DB_PASSWORD=tu_password_secreto
 DB_NAME=swapi_db
+```
+> ⚠️ **Nota:** Si pruebas en local, asegúrate de que tu IP tenga permiso para acceder a la base de datos (Security Groups en AWS RDS).
 
-⚠️ Debe usar las mismas credenciales que el servicio POST.
+---
 
-Si estás usando RDS, asegúrate de que tu IP esté permitida en el Security Group (puerto 3306).
+## 🛠️ Comandos de Despliegue y Pruebas
 
-☁️ Despliegue
-Desplegar en AWS
+### Desplegar en AWS (Producción)
+Para subir tu código a la nube:
+
+```bash
 serverless deploy
+```
+Este comando empaquetará tu código, creará las funciones Lambda y te devolverá las URLs públicas.
 
-Salida esperada:
-
+**Salida esperada:**
+```cmd
 endpoints:
-  GET - https://xxxxx.execute-api.us-east-1.amazonaws.com/api/people
-  GET - https://xxxxx.execute-api.us-east-1.amazonaws.com/api/favorites
-Ejecutar localmente (sin AWS)
+  GET - https://random_id.execute-api.us-east-1.amazonaws.com/api/people
+  GET - https://random_id.execute-api.us-east-1.amazonaws.com/api/favorites
+```
+
+### Ejecutar en Local (Offline)
+Puedes simular la ejecución de una función sin subirla a AWS:
+
+```bash
+# Probar endpoint de personajes
 serverless invoke local --function getPeople
+
+# Probar endpoint de favoritos
 serverless invoke local --function getFavorites
+```
 
-Ideal para pruebas unitarias y debugging rápido.
+---
 
-🔌 Endpoints
-🔍 GET /api/people
+## 🔌 Documentación de Endpoints
 
-Consulta personajes desde SWAPI con soporte de paginación y búsqueda.
+### 1. `GET /api/people`
+Obtiene personajes de la API oficial de Star Wars (SWAPI), traduce sus atributos al español y añade soporte para búsqueda.
 
-Query Params
-Parámetro	Descripción
-page	Número de página
-search	Filtro por nombre
-Ejemplo
-GET /api/people?page=1&search=luke
-Respuesta Exitosa
-{
-  "total": 82,
-  "siguiente": "...",
-  "anterior": null,
-  "resultados": [
+-   **Query Params:**
+    -   `page`: Número de paginación (ej: `?page=2`).
+    -   `search`: Filtro por nombre (ej: `?search=skywalker`).
+-   **Respuesta Exitosa (200 OK):**
+    ```json
     {
-      "nombre": "Luke Skywalker",
-      "altura": "172",
-      "peso": "77",
-      "genero": "male"
+      "total": 82,
+      "siguiente": "...",
+      "anterior": null,
+      "resultados": [
+        {
+          "nombre": "Luke Skywalker",
+          "altura": "172",
+          "color_ojos": "blue"
+          // ... atributos traducidos
+        }
+      ]
     }
-  ]
-}
-Características
+    ```
 
-Traducción automática de atributos (EN → ES)
+### 2. `GET /api/favorites`
+Consulta la base de datos MySQL para listar los personajes que han sido guardados como favoritos.
 
-Conserva estructura paginada original de SWAPI
-
-Manejo de errores controlado
-
-⭐ GET /api/favorites
-
-Obtiene los personajes almacenados en MySQL.
-
-Query Params
-Parámetro	Default	Descripción
-page	1	Página actual
-pageSize	10	Cantidad por página
-Ejemplo
-GET /api/favorites?page=1&pageSize=5
-Respuesta Exitosa
-{
-  "page": 1,
-  "limit": 10,
-  "total": 5,
-  "data": [
+-   **Query Params:**
+    -   `page`: Página actual (Default: 1).
+    -   `pageSize`: Cantidad de registros por página (Default: 10).
+-   **Respuesta Exitosa (200 OK):**
+    ```json
     {
-      "id": "1",
-      "nombre": "Luke Skywalker",
-      "fecha_creacion": "2026-02-15T12:30:00Z"
+      "page": 1,
+      "limit": 10,
+      "total": 5,
+      "data": [
+        { "id": "1", "nombre": "Luke Skywalker", "fecha_creacion": "..." }
+      ]
     }
-  ]
-}
-🧠 Decisiones Técnicas
+    ```
 
-Uso de esbuild para reducir cold start.
+---
 
-Separación por capas para facilitar testing.
+## 🚑 Solución de Problemas Comunes (Troubleshooting)
 
-Cliente SWAPI desacoplado en servicio independiente.
+### Error: `Connect ETIMEDOUT`
+-   **Causa:** La función Lambda no puede conectar con la base de datos.
+-   **Solución:** Revisa los **Security Groups** de tu RDS en AWS. Deben permitir tráfico entrante (Inbound Rules) en el puerto `3306` desde `0.0.0.0/0` (para pruebas públicas) o desde la VPC de la Lambda.
 
-Tipado fuerte con TypeScript para evitar errores en runtime.
+### Error: `Internal Server Error`
+-   **Causa:** Error no controlado en el código o fallo en SWAPI.
+-   **Solución:** Ve a **AWS CloudWatch** > Log groups > `/aws/lambda/Swapi-Lambda-http-api-get-dev-getPeople` para ver el detalle exacto del error.
 
-Manejo estandarizado de respuestas HTTP.
+### Error: `Missing Authentication Token` al llamar a la API
+-   **Causa:** Estás llamando a una URL incorrecta.
+-   **Solución:** Verifica que la URL termine exactamente en `/api/people` o `/api/favorites`. A veces falta el path final.
 
-🚑 Troubleshooting
-❗ ETIMEDOUT al conectar MySQL
+---
 
-Revisar Security Group de RDS.
-Debe permitir tráfico entrante por el puerto 3306.
+## 📦 Scripts Disponibles
 
-❗ Internal Server Error
+| Script | Descripción |
+| :--- | :--- |
+| `npm install` | Instala las dependencias del proyecto. |
+| `serverless deploy` | Desplegar la aplicación en AWS. |
+| `serverless invoke local -f [nombre]` | Ejecutar una función localmente para pruebas. |
+| `npm test` | Ejecutar pruebas unitarias (si están configuradas). |
 
-Revisar logs en:
+---
 
-AWS Console → CloudWatch → Log Groups →
-/aws/lambda/Swapi-Lambda-http-api-get-dev-getPeople
-
-❗ Missing Authentication Token
-
-La URL es incorrecta.
-Verifica que termine exactamente en:
-
-/api/people
-/api/favorites
-📦 Scripts Disponibles
-Script	Descripción
-npm install	Instalar dependencias
-serverless deploy	Desplegar en AWS
-serverless invoke local -f [nombre]	Ejecutar función local
-npm test	Ejecutar pruebas
-📌 Autor
-
-Adrian Nuñuvero Ochoa
-Prueba Técnica – Seidor 2026
+**Desarrollado por Adrian Nuñuvero Ochoa con cariño para la Prueba Técnica Seidor 2026**
