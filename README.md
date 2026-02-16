@@ -59,10 +59,10 @@ Este es el paso más importante. Crea un archivo llamado `.env` en la raíz y co
 
 **Archivo: `.env`**
 ```ini
-DB_HOST=swapi-db.cluster-xyz.us-east-1.rds.amazonaws.com
+DB_HOST=database-swapi.ci54eqae82ye.us-east-1.rds.amazonaws.com
 DB_USER=admin
-DB_PASSWORD=tu_password_secreto
-DB_NAME=swapi_db
+DB_NAME=SWAPI_DB_tec_test
+DB_PASSWORD=adrian123
 ```
 > ⚠️ **Nota:** Si pruebas en local, asegúrate de que tu IP tenga permiso para acceder a la base de datos (Security Groups en AWS RDS).
 
