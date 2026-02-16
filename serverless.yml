@@ -1,0 +1,76 @@
+service: Swapi-Lambda-http-api-get
+
+# 1. Los plugins SIEMPRE arriba en la v3 para que carguen las variables primero
+plugins:
+  - serverless-auto-swagger
+  - serverless-dotenv-plugin
+  - serverless-esbuild
+
+useDotenv: true # Fuerza al framework a mirar tu archivo .env
+ 
+custom:
+  autoswagger:
+    title: 'SWAPI Lambda API (GET)'
+    apiType: 'http'
+    generateSwaggerOnDeploy: true
+    basePath: '/'
+    typefiles: []
+    host: 'y76a850dh4.execute-api.us-east-1.amazonaws.com'
+
+provider:
+  name: aws
+  timeout: 30
+  runtime: nodejs20.x
+  region: us-east-1
+  httpApi:
+    cors:
+      allowedOrigins:
+        - '*'
+      allowedHeaders:
+        - Content-Type
+        - X-Amz-Date
+        - Authorization
+        - X-Api-Key
+        - X-Amz-Security-Token
+      allowedMethods:
+        - GET
+        - OPTIONS
+  environment:
+    # Ahora sí encontrará estos valores
+    DB_HOST: ${env:DB_HOST}
+    DB_USER: ${env:DB_USER}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+    DB_NAME: ${env:DB_NAME}
+
+functions:
+  getPeople:
+    handler: src/handlers/getPeople.handler
+    events:
+      - httpApi:
+          path: /api/people
+          method: get
+          description: 'Obtener personajes de Star Wars'
+          summary: 'Get People'
+          queryStringParameters:
+            page:
+              required: false
+              description: 'Número de página (default: 1)'
+            search:
+              required: false
+              description: 'Término de búsqueda por nombre'
+
+  getFavorites:
+    handler: src/handlers/getFavorites.handler
+    events:
+      - httpApi:
+          path: /api/favorites
+          method: get
+          description: 'Obtener lista de favoritos'
+          summary: 'Get Favorites'
+          queryStringParameters:
+            page:
+              required: false
+              description: 'Número de página (default: 1)'
+            pageSize:
+              required: false
+              description: 'Cantidad de elementos por página (default: 10)'
